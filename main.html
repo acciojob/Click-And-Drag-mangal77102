@@ -1,97 +1,71 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Draggable Cubes</title>
+  <title>Draggable Scroll</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 40px;
+      font-family: Arial;
     }
 
-    .container {
+    .items {
       width: 600px;
-      height: 400px;
+      overflow-x: scroll;
+      overflow-y: hidden;
+      white-space: nowrap;
       border: 2px solid black;
-      margin: 40px auto;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      padding: 10px;
-      position: relative; /* Important for dragging */
-      overflow: hidden;
-    }
-
-    .cube {
-      width: 80px;
-      height: 80px;
-      background-color: steelblue;
       cursor: grab;
-      user-select: none;
     }
 
-    .cube:active {
-      cursor: grabbing;
+    .item {
+      display: inline-block;
+      width: 200px;
+      height: 200px;
+      margin: 10px;
+      background: steelblue;
     }
   </style>
 </head>
 <body>
 
-<div class="container" id="container">
-  <div class="cube"></div>
-  <div class="cube"></div>
-  <div class="cube"></div>
-  <div class="cube"></div>
-  <div class="cube"></div>
-  <div class="cube"></div>
-  <div class="cube"></div>
-  <div class="cube"></div>
+<div class="items">
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
+  <div class="item"></div>
 </div>
 
 <script>
-  const container = document.getElementById("container");
-  const cubes = document.querySelectorAll(".cube");
+  const slider = document.querySelector('.items');
 
-  let activeCube = null;
-  let offsetX = 0;
-  let offsetY = 0;
+  let isDown = false;
+  let startX;
+  let scrollLeft;
 
-  cubes.forEach(cube => {
-    cube.addEventListener("mousedown", function (e) {
-
-      activeCube = cube;
-
-      const rect = cube.getBoundingClientRect();
-      offsetX = e.clientX - rect.left;
-      offsetY = e.clientY - rect.top;
-
-      // Switch from grid positioning to absolute
-      cube.style.position = "absolute";
-      cube.style.zIndex = "1000";
-    });
+  slider.addEventListener('mousedown', (e) => {
+    isDown = true;
+    startX = e.pageX - slider.offsetLeft;
+    scrollLeft = slider.scrollLeft;
   });
 
-  document.addEventListener("mousemove", function (e) {
-    if (!activeCube) return;
-
-    const containerRect = container.getBoundingClientRect();
-
-    let newLeft = e.clientX - containerRect.left - offsetX;
-    let newTop = e.clientY - containerRect.top - offsetY;
-
-    // Boundary constraints
-    const maxLeft = container.clientWidth - activeCube.offsetWidth;
-    const maxTop = container.clientHeight - activeCube.offsetHeight;
-
-    if (newLeft < 0) newLeft = 0;
-    if (newTop < 0) newTop = 0;
-    if (newLeft > maxLeft) newLeft = maxLeft;
-    if (newTop > maxTop) newTop = maxTop;
-
-    activeCube.style.left = newLeft + "px";
-    activeCube.style.top = newTop + "px";
+  slider.addEventListener('mouseleave', () => {
+    isDown = false;
   });
 
-  document.addEventListener("mouseup", function () {
-    activeCube = null;
+  slider.addEventListener('mouseup', () => {
+    isDown = false;
+  });
+
+  slider.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+
+    e.preventDefault();
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - startX);
+    slider.scrollLeft = scrollLeft - walk;
   });
 </script>
 
